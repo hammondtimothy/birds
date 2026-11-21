@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Birds">
+<meta name="theme-color" content="#2f7fb8">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<title>Birds of Mordon</title>
+<style>
+:root{--blue:#2f7fb8;--dark:#14243d;--green:#3f8a3a;--bg:#f3f5f7;--card:#fff;--line:#e3e7eb;--muted:#6b7683;--red:#c8322b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:#1b2430;font:16px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button,input,textarea,select{font:inherit}
+.top{position:sticky;top:0;z-index:5;background:var(--blue);color:#fff;padding:calc(env(safe-area-inset-top) + 8px) 12px 8px}
+.bar{display:flex;align-items:center;gap:8px}
+.bar h1{flex:1;margin:0;font-size:20px;font-weight:700}
+.bar small{font-weight:400;opacity:.85;font-size:13px;margin-left:6px}
+.ib{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:10px;min-width:38px;height:36px;font-size:20px;padding:0 10px}
+.status{font-size:12px;opacity:.9;min-height:15px;margin-top:2px}
+.search{display:flex;gap:6px;margin-top:8px}
+.search input{flex:1;border:0;border-radius:10px;padding:8px 10px;font-size:16px}
+.seg{display:flex;background:rgba(255,255,255,.18);border-radius:10px;margin-top:8px;padding:2px}
+.seg button{flex:1;border:0;background:none;color:#fff;padding:6px 0;border-radius:8px;font-size:14px}
+.seg button.on{background:#fff;color:var(--blue);font-weight:600}
+.banner{margin:10px 10px 0;background:var(--dark);color:#fff;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center}
+.banner b{font-size:15px}.banner div{flex:1;font-size:13px;line-height:1.4}
+.banner .go{font-size:22px;opacity:.7}
+.warn{margin:10px;background:#fff4d6;border:1px solid #f0d58a;border-radius:10px;padding:10px;font-size:14px}
+ul.list{list-style:none;margin:8px 0 40px;padding:0}
+.list li{display:flex;align-items:center;gap:10px;background:var(--card);margin:0 10px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.list li:first-child{border-radius:12px 12px 0 0}.list li:last-child{border-radius:0 0 12px 12px;border-bottom:0}
+.list li:only-child{border-radius:12px}
+.th{width:58px;height:44px;flex:none;border-radius:6px;background:#fff center/contain no-repeat;display:flex;align-items:center;justify-content:center;color:#b4bcc6;font-weight:700;font-size:20px}
+.th.none{background:#eef1f4}
+.nm{flex:1;min-width:0}
+.nm b{display:block;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:42%}
+.chip{font-size:11px;font-weight:700;border-radius:20px;padding:2px 7px;background:#e6eef6;color:var(--blue);white-space:nowrap}
+.chip.H{background:#e2f1df;color:var(--green)}.chip.M{background:#e6eef6;color:var(--blue)}.chip.O{background:#f3e8f7;color:#7a3f93}
+.empty{text-align:center;color:var(--muted);padding:30px}
+/* pages */
+.page{position:fixed;inset:0;background:var(--bg);z-index:20;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
+.page.show{display:block}
+.ptop{position:sticky;top:0;z-index:2;background:var(--blue);color:#fff;padding:calc(env(safe-area-inset-top) + 8px) 12px 8px;display:flex;align-items:center;gap:8px}
+.ptop h2{flex:1;margin:0;font-size:18px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero{background:#fff;text-align:center;padding:10px}
+.hero img{max-width:100%;max-height:260px}
+.hero .noimg{height:120px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.sec{background:var(--card);margin:10px;border-radius:12px;padding:12px}
+.sec h3{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.sec p{margin:0}
+.big{font-size:24px;font-weight:700;margin:0 0 6px}
+textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;min-height:90px;resize:vertical;font-size:16px}
+a.link{color:var(--blue)}
+.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:600;font-size:15px}
+.btn.grey{background:#e6eaee;color:#1b2430}.btn.red{background:var(--red)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+label.f{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600}
+input.t{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:16px;background:#fff}
+.cb{display:flex;align-items:center;gap:6px;font-size:16px;margin-right:16px}
+.cb input{width:22px;height:22px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.stats div{background:var(--bg);border-radius:8px;padding:6px;text-align:center;font-size:12px;color:var(--muted)}
+.stats b{display:block;font-size:15px;color:#1b2430}
+table.arr{width:100%;border-collapse:collapse;font-size:14px}
+.arr td{padding:4px 2px;border-bottom:1px solid var(--line)}
+.arr td.y{width:44px;font-weight:600}.arr td.d{width:62px}
+.arr td.v{width:86px;white-space:nowrap;text-align:right;color:var(--muted);font-size:12px}
+.barw{position:relative;height:10px;background:#eef1f4;border-radius:5px}
+.barw i{position:absolute;top:0;height:10px;width:10px;border-radius:5px;background:var(--dark)}
+.barw s{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red);text-decoration:none}
+.arr tr.latest td{background:#f4f9fd}
+.x{border:0;background:none;color:#b0b8c2;font-size:16px;padding:0 4px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%);background:#1b2430;color:#fff;padding:8px 14px;border-radius:20px;font-size:14px;z-index:50;display:none}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="bar">
+    <h1>Birds of Mordon<small id="count"></small></h1>
+    <button class="ib" id="addBtn" aria-label="Add bird">＋</button>
+    <button class="ib" id="setBtn" aria-label="Settings">⚙︎</button>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="search"><input id="q" type="search" placeholder="Search birds or notes" autocomplete="off"></div>
+  <div class="seg" id="seg">
+    <button data-f="all" class="on">All</button>
+    <button data-f="H">Home</button>
+    <button data-f="M">Mordon</button>
+    <button data-f="O">Further</button>
+  </div>
+</div>
+<div id="warn"></div>
+<div id="banners"></div>
+<ul class="list" id="list"></ul>
+
+<!-- Detail page -->
+<div class="page" id="pDetail">
+  <div class="ptop"><button class="ib" data-back>‹</button><h2 id="dTitle"></h2><button class="ib" id="dEdit">Edit</button></div>
+  <div id="dBody"></div>
+</div>
+
+<!-- Edit page -->
+<div class="page" id="pEdit">
+  <div class="ptop"><button class="ib" data-back>‹</button><h2 id="eTitle">Add bird</h2><button class="ib" id="eSave">Save</button></div>
+  <div class="sec">
+    <label class="f" style="margin-top:0">Name</label>
+    <input class="t" id="eName" placeholder="e.g. Stonechat">
+    <label class="f">Where seen</label>
+    <div class="row"><label class="cb"><input type="checkbox" id="eH"> Home (H)</label><label class="cb"><input type="checkbox" id="eM"> Mordon (M)</label></div>
+    <label class="f">Other places (separate with commas)</label>
+    <input class="t" id="eOther" placeholder="e.g. Langdon Beck, Kielder">
+    <label class="f">Picture</label>
+    <div class="row">
+      <div class="th none" id="ePic" style="width:90px;height:68px"></div>
+      <label class="btn grey" for="eFile">Choose photo</label>
+      <button class="btn grey" id="eNoPic" type="button">Remove</button>
+      <input type="file" id="eFile" accept="image/*" style="display:none">
+    </div>
+    <label class="f">Short description</label>
+    <textarea id="eDesc" style="min-height:70px"></textarea>
+    <label class="f">Notes</label>
+    <textarea id="eNotes"></textarea>
+    <label class="f">RSPB page (optional)</label>
+    <input class="t" id="eLink" placeholder="https://www.rspb.org.uk/…">
+    <label class="f">Arrival dates</label>
+    <label class="cb"><input type="checkbox" id="eArr"> Keep a record of arrival dates (like the Swallows)</label>
+  </div>
+  <div class="sec" id="eDelWrap"><button class="btn red" id="eDel">Delete this bird</button></div>
+</div>
+
+<!-- Settings page -->
+<div class="page" id="pSet">
+  <div class="ptop"><button class="ib" data-back>‹</button><h2>Settings</h2><span style="width:38px"></span></div>
+  <div class="sec">
+    <h3>GitHub connection</h3>
+    <p class="small" id="sState"></p>
+    <div id="sConnect">
+      <label class="f">Token for hammondtimothy/birds-data</label>
+      <input class="t" id="sToken" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <p style="margin-top:10px"><button class="btn" id="sGo">Connect this phone</button></p>
+    </div>
+    <div id="sConnected">
+      <p class="row" style="margin-top:10px"><button class="btn grey" id="sSync">Check for changes now</button><button class="btn grey" id="sOff">Disconnect this phone</button></p>
+    </div>
+  </div>
+  <div class="sec">
+    <h3>Backup</h3>
+    <p class="small">Your records live in the private birds-data repo. You can also save a copy to Files.</p>
+    <p style="margin-top:10px"><button class="btn grey" id="sExport">Save a backup copy</button></p>
+  </div>
+  <div class="sec small">Birds of Mordon · version 1.0</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ---------- Starting data (from Birds of Mordon.docx) ---------- */
+const RSPB='https://www.rspb.org.uk/birds-and-wildlife/wildlife-guides/bird-a-z/';
+const SEED=[
+['blackbird','Blackbird','H','Common thrush of gardens and hedges. Males are all black with an orange-yellow bill; females are dark brown. Rich, fluting song at dawn and dusk.'],
+['black-grouse','Black Grouse','Langdon Beck','Gamebird of moorland edges. The male is glossy blue-black with a lyre-shaped tail and red wattles, and gathers with others at spring "leks".'],
+['blue-tit','Blue Tit','H','Small, busy tit with a blue cap, white cheeks and yellow underparts. A regular at garden feeders.'],
+['bullfinch','Bullfinch','H','Chunky finch with a black cap and white rump; the male has a rosy-pink breast. Quiet, usually in pairs, and fond of buds.'],
+['buzzard','Buzzard','H','Our commonest large bird of prey. Broad wings, often seen soaring in circles and giving a mewing call.'],
+['carrion-crow','Carrion Crow','H','All-black crow with a heavy bill. Usually seen alone or in pairs, unlike the flocking rook.'],
+['canada-goose','Canada Goose','M','Large introduced goose with a black neck and white chin-strap. Noisy flocks on lakes and fields.'],
+['chaffinch','Chaffinch','H','Common finch with bold white wing bars. The male has a pink breast and blue-grey cap.'],
+['collared-dove','Collared Dove','M','Slim, pale buff-grey dove with a thin black half-collar. Repeats a three-note coo.'],
+['corn-bunting','Corn Bunting','H','Plump, streaky brown bunting of open farmland. Sings a jangling "bunch of keys" song from wires. Much declined.'],
+['curlew','Curlew','M','Europe’s largest wader, with a long down-curved bill and a haunting, bubbling call.'],
+['fieldfare','Fieldfare','H','Large thrush with a grey head and rump. Winter visitor from Scandinavia, in chattering flocks that strip berries.'],
+['golden-plover','Golden Plover','M','Wader with gold-spangled upperparts. Breeds on the uplands and winters in flocks on farmland.'],
+['goldfinch','Goldfinch','H','Colourful finch with a red face and gold wing bars. Twittering flocks feed on thistles and garden seed.'],
+['greenfinch','Greenfinch','H','Stocky olive-green finch with yellow flashes in the wings and tail. Wheezing song.'],
+['great-spotted-woodpecker','Great Spotted Woodpecker','H','Black-and-white woodpecker with red under the tail. Drums loudly on branches in spring.'],
+['greylag-goose','Greylag Goose','M','Large grey-brown goose with an orange bill and pink legs. Ancestor of the farmyard goose.'],
+['great-grey-shrike','Great Grey Shrike','M','Scarce winter visitor. Grey, black and white with a bandit mask; perches on bush tops to hunt.','Spring 2014'],
+['great-tit','Great Tit','M','Our largest tit: black head, white cheeks and a yellow breast with a black stripe. "Teacher-teacher" song.'],
+['grey-partridge','Grey Partridge','H','Plump farmland gamebird with an orange face and dark belly patch. Much declined.'],
+['grey-heron','Grey Heron','H','Tall grey heron that stands motionless at the water’s edge. Flies with its neck tucked in.'],
+['herring-gull','Herring Gull','H','Big gull with a pale grey back and pink legs. Loud, laughing calls.'],
+['house-martin','House Martin','M','Summer visitor. Blue-black above and white below with a white rump; builds mud nests under eaves.'],
+['house-sparrow','House Sparrow','H','Familiar chirping sparrow. The male has a grey crown and black bib.'],
+['jackdaw','Jackdaw','H','Small crow with a grey nape and pale eye. Sociable and noisy; often nests in chimneys.'],
+['lapwing','Lapwing','M','Black-and-white wader with a wispy crest and green sheen. Tumbling display flight and "peewit" call.'],
+['lesser-black-backed-gull','Lesser Black-backed Gull','M','Large gull with a dark grey back and yellow legs.'],
+['lesser-spotted-woodpecker','Lesser Spotted Woodpecker','H','Sparrow-sized woodpecker with a barred back. Scarce and hard to find.'],
+['little-owl','Little Owl','H','Small owl with fierce yellow eyes. Often seen in daylight on posts and walls.'],
+['linnet','Linnet','M','Slim brown finch; the breeding male has a crimson forehead and breast. Flocks on farmland.'],
+['magpie','Magpie','H','Black and white with a long, glossy green-blue tail. Loud chattering call.'],
+['mallard','Mallard','M','Our commonest duck. The drake has a glossy green head and yellow bill; the female is mottled brown.'],
+['meadow-pipit','Meadow Pipit','H','Small streaky brown bird of open country. Sings as it "parachutes" down from a song flight.'],
+['moorhen','Moorhen','M','Dark waterbird with a red-and-yellow bill. Flicks its white under-tail as it swims.'],
+['mute-swan','Mute Swan','M','Large white swan with an orange bill topped by a black knob.'],
+['nightjar','Nightjar','Hamsterley Forest','Summer visitor to heaths and forest clearings. Superbly camouflaged; gives a long churring song at dusk.'],
+['osprey','Osprey','Kielder','Fish-eating bird of prey, brown above and white below. Plunges feet-first into water. Summer visitor.'],
+['oystercatcher','Oystercatcher','M','Black-and-white wader with a long orange bill and pink legs. Loud piping calls.'],
+['pheasant','Pheasant','H','Introduced gamebird. The male is coppery with a green head, red wattle and long tail.'],
+['pied-wagtail','Pied Wagtail','H','Black-and-white wagtail that constantly pumps its tail. Runs about on lawns, roofs and car parks.'],
+['red-grouse','Red Grouse','Langdon Beck','Dark red-brown grouse of heather moorland. Call sounds like "go-back, go-back".'],
+['redpoll','Redpoll','M','Small streaky finch with a red forehead. Feeds acrobatically in birch and alder.'],
+['redwing','Redwing','H','Our smallest thrush, with a cream eye-stripe and red flanks. Winter visitor, often with fieldfares.'],
+['reed-bunting','Reed Bunting','M','In summer the male has a black head and white collar. Reedbeds and wet farmland.'],
+['raven','Raven','H','Our largest crow. Huge bill, wedge-shaped tail and deep "pruk" call; tumbles in flight.'],
+['robin','Robin','H','Orange-red breast. Sings almost all year round and is fiercely territorial.'],
+['sedge-warbler','Sedge Warbler','M','Summer visitor with a bold cream eye-stripe. Scratchy, chattering song from reeds.'],
+['shelduck','Shelduck','M','Large goose-like duck: white with a dark green head, chestnut band and red bill.'],
+['short-eared-owl','Short-eared Owl','M','Day-flying owl of moors and rough grassland. Yellow eyes; quarters low on long wings.'],
+['skylark','Skylark','M','Streaky brown lark with a small crest. Sings continuously while hanging high in the sky.'],
+['snipe','Snipe','Langdon Beck','Wader with a very long straight bill and striped head. Zig-zags when flushed and "drums" in display.'],
+['song-thrush','Song Thrush','H','Brown thrush with a spotted breast. Repeats each phrase of its song; smashes snails on stones.'],
+['sparrowhawk','Sparrowhawk','H','Small, agile hawk that ambushes small birds. Male slate-grey with an orange-barred breast; female larger and browner.'],
+['starling','Starling','H','Glossy, speckled and noisy. Famous for its huge winter murmurations.'],
+['swallow','Swallow','H','Summer visitor. Glossy blue-black above with a red throat and long tail streamers. Arrives in April, leaves in September–October.','',
+  ['2009-03-20','2010-04-24','2011-04-17','2012-05-03','2013-04-15','2014-04-21','2015-04-20','2016-04-17','2017-04-17','2018-04-15','2019-04-20','2020-04-08','2021-04-05','2022-04-23','2023-04-16','2024-04-12','2025-04-24','2026-04-21']],
+['swift','Swift','H','Summer visitor, May to August. Dark, scythe-shaped wings; screaming parties over rooftops. Almost never lands.'],
+['tawny-owl','Tawny Owl','H','Our commonest owl: brown, round-faced and dark-eyed. "Twit-twoo" is the female and male calling together.'],
+['wheatear','Wheatear','M','Summer visitor with a white rump. The male is grey-backed with a black mask.'],
+['whitethroat','Whitethroat','M','Summer warbler with a white throat. Scratchy song from hedgerows, often in a short song flight.'],
+['whooper-swan','Whooper Swan','M','Winter visitor from Iceland. Yellow-and-black bill, straight neck and a bugling call.'],
+['wigeon','Wigeon','M','Duck whose drake has a chestnut head with a yellow forehead. Whistling "wheeoo" call; winter flocks.'],
+['wood-pigeon','Wood Pigeon','H','Large pigeon with a white neck patch and white wing bars. Soft five-note cooing.'],
+['woodcock','Woodcock','Hamsterley Forest','Plump, long-billed woodland wader, superbly camouflaged. Males make "roding" flights at dusk.'],
+['wren','Wren','H','Tiny brown bird with a cocked tail and an astonishingly loud song.'],
+['yellowhammer','Yellowhammer','H','The male has a bright yellow head. Song: "a little bit of bread and no cheese".'],
+['yellow-wagtail','Yellow Wagtail','H','Summer visitor, bright yellow below. Wet meadows and farmland; declining.'],
+['stonechat','Stonechat','','Small chat that perches on gorse and fence tops. Male has a black head, white collar and orange breast; call like two stones tapped together.','Male seen 21 Nov 2026']
+];
+const SLUG_FIX={'redpoll':'lesser-redpoll','wood-pigeon':'woodpigeon'};
+function seedState(){
+  const t=1;
+  return {v:1,birds:SEED.map(([id,name,loc,desc,notes,arr])=>({
+    id,name,seen:loc?[loc]:[],desc,notes:notes||'',link:RSPB+(SLUG_FIX[id]||id)+'/',
+    arrivals:arr||null,t}))};
+}
+
+/* ---------- Storage ---------- */
+const OWNER='hammondtimothy',REPO='birds-data',DATA='birds.json',IMGS='images.json';
+const LS={
+  get:(k,d)=>{try{const v=localStorage.getItem('birds.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set:(k,v)=>{try{localStorage.setItem('birds.'+k,JSON.stringify(v))}catch(e){}},
+  del:(k)=>{try{localStorage.removeItem('birds.'+k)}catch(e){}}
+};
+// images live in IndexedDB (localStorage is shared with your other apps and is small)
+const IDB={
+  db:null,
+  open(){return new Promise(res=>{try{const r=indexedDB.open('birds',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>{this.db=r.result;res()};r.onerror=()=>res()}catch(e){res()}})},
+  get(k){return new Promise(res=>{if(!this.db)return res(null);try{const r=this.db.transaction('kv').objectStore('kv').get(k);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null)}catch(e){res(null)}})},
+  set(k,v){return new Promise(res=>{if(!this.db)return res();try{const tx=this.db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>res()}catch(e){res()}})}
+};
+
+let state=LS.get('state',null)||seedState();
+let images={};
+let token=LS.get('token','');
+let dirty=LS.get('dirty',false), imgDirty=LS.get('imgDirty',false);
+let filter='all', query='', current=null, editing=null, editPic=undefined;
+
+function now(){return Date.now()}
+function live(){return state.birds.filter(b=>!b.deleted)}
+function byId(id){return state.birds.find(b=>b.id===id&&!b.deleted)}
+function saveLocal(){LS.set('state',state);LS.set('dirty',dirty);LS.set('imgDirty',imgDirty)}
+function touch(b,msg){b.t=now();dirty=true;saveLocal();queuePush(msg)}
+
+/* ---------- GitHub ---------- */
+function b64enc(str){const bytes=new TextEncoder().encode(str);let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s)}
+function b64dec(b64){const bin=atob(b64.replace(/\s/g,''));const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new TextDecoder().decode(u)}
+async function gh(path,opt={}){
+  const r=await fetch('https://api.github.com/repos/'+OWNER+'/'+REPO+'/contents/'+path+(opt.method?'':'?t='+now()),{
+    method:opt.method||'GET',cache:'no-store',
+    headers:Object.assign({'Authorization':'Bearer '+token,'Accept':opt.accept||'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},opt.body?{'Content-Type':'application/json'}:{}),
+    body:opt.body?JSON.stringify(opt.body):undefined});
+  return r;
+}
+async function getFile(name){
+  const r=await gh(name);
+  if(r.status===404)return null;
+  if(r.status===401||r.status===403)throw new Error('token');
+  if(!r.ok)throw new Error('http '+r.status);
+  const j=await r.json();
+  let text;
+  if(j.content&&j.encoding==='base64')text=b64dec(j.content);
+  else{const raw=await gh(name,{accept:'application/vnd.github.raw+json'});if(!raw.ok)throw new Error('http '+raw.status);text=await raw.text()}
+  return {sha:j.sha,data:JSON.parse(text)};
+}
+async function putFile(name,data,sha,msg){
+  const body={message:msg,content:b64enc(JSON.stringify(data,null,name===IMGS?0:1))};
+  if(sha)body.sha=sha;
+  const r=await gh(name,{method:'PUT',body});
+  if(r.status===401||r.status===403)throw new Error('token');
+  if(r.status===409||r.status===422)return null; // someone else changed it – retry
+  if(!r.ok)throw new Error('http '+r.status);
+  return (await r.json()).content.sha;
+}
+function mergeBirds(remote,local){
+  const m=new Map();
+  (remote.birds||[]).forEach(b=>m.set(b.id,b));
+  (local.birds||[]).forEach(b=>{const r=m.get(b.id);if(!r||(b.t||0)>=(r.t||0))m.set(b.id,b)});
+  return {v:1,birds:[...m.values()]};
+}
+
+let pushTimer=null,busy=false,pendingMsg=[];
+function queuePush(msg){if(msg)pendingMsg.push(msg);clearTimeout(pushTimer);pushTimer=setTimeout(sync,700)}
+
+async function sync(){
+  if(!token){setStatus('');return}
+  if(busy){queuePush();return}
+  if(!navigator.onLine){setStatus(dirty||imgDirty?'Offline – changes saved on this phone and will upload later':'Offline');return}
+  busy=true;
+  try{
+    setStatus(dirty||imgDirty?'Saving…':'Checking…');
+    // birds.json
+    for(let attempt=0;attempt<3;attempt++){
+      const remote=await getFile(DATA);
+      if(!remote){ // first run – create it
+        const sha=await putFile(DATA,state,null,'Birds: first set-up');
+        if(sha){dirty=false;break}
+        continue;
+      }
+      if(!dirty){state=remote.data;break}
+      const merged=mergeBirds(remote.data,state);
+      const msg='Birds: '+([...new Set(pendingMsg)].slice(0,3).join(', ')||'update');
+      const sha=await putFile(DATA,merged,remote.sha,msg);
+      if(sha){state=merged;dirty=false;pendingMsg=[];break}
+    }
+    // images.json
+    for(let attempt=0;attempt<3;attempt++){
+      const remote=await getFile(IMGS);
+      if(!remote){
+        if(!imgDirty){showImgWarn(true);break}
+        const sha=await putFile(IMGS,images,null,'Birds: pictures');
+        if(sha){imgDirty=false;showImgWarn(false);break}
+        continue;
+      }
+      showImgWarn(false);
+      if(!imgDirty){
+        if(remote.sha!==LS.get('imgSha','')){images=remote.data;await IDB.set('images',images);LS.set('imgSha',remote.sha)}
+        break;
+      }
+      const merged=Object.assign({},remote.data,images);
+      Object.keys(merged).forEach(k=>{if(merged[k]===null)delete merged[k]});
+      const sha=await putFile(IMGS,merged,remote.sha,'Birds: pictures');
+      if(sha){images=merged;await IDB.set('images',images);LS.set('imgSha',sha);imgDirty=false;break}
+    }
+    // drop pictures of deleted birds from the display copy
+    saveLocal();
+    setStatus(dirty||imgDirty?'Not all changes uploaded – will retry':'All saved ✓');
+    render();if(current&&pDetail.classList.contains('show'))showDetail(current,true);
+  }catch(e){
+    if(e.message==='token')setStatus('GitHub token not accepted – see ⚙︎ Settings');
+    else setStatus(dirty||imgDirty?'Couldn’t reach GitHub – changes kept on this phone':'Couldn’t reach GitHub');
+  }finally{busy=false}
+}
+
+/* ---------- Helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function setStatus(s){$('#status').textContent=s}
+function toast(s){const t=$('#toast');t.textContent=s;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',1800)}
+function chipHTML(s){const c=s==='H'?'H':s==='M'?'M':'O';const label=s==='H'?'Home':s==='M'?'Mordon':s;return '<span class="chip '+c+'">'+esc(label)+'</span>'}
+function others(b){return (b.seen||[]).filter(s=>s!=='H'&&s!=='M')}
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function parseD(s){const [y,m,d]=s.split('-').map(Number);return {y,m,d}}
+function fmtD(s,withYear){const p=parseD(s);return p.d+' '+MON[p.m-1]+(withYear?' '+p.y:'')}
+function doy(s){const p=parseD(s);return Math.round((Date.UTC(p.y,p.m-1,p.d)-Date.UTC(p.y,0,1))/864e5)}
+function doyLabel(n){const d=new Date(Date.UTC(2025,0,1)+Math.round(n)*864e5);return d.getUTCDate()+' '+MON[d.getUTCMonth()]}
+function arrStats(list){
+  const ds=list.map(doy);const avg=ds.reduce((a,b)=>a+b,0)/ds.length;
+  let ei=0,li=0;ds.forEach((v,i)=>{if(v<ds[ei])ei=i;if(v>ds[li])li=i});
+  return {avg,min:ds[ei],max:ds[li],early:list[ei],late:list[li]};
+}
+function slugify(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+
+/* ---------- Main list ---------- */
+function render(){
+  const birds=live().sort((a,b)=>a.name.localeCompare(b.name));
+  $('#count').textContent=birds.length+' species';
+  const q=query.trim().toLowerCase();
+  const shown=birds.filter(b=>{
+    const s=b.seen||[];
+    if(filter==='H'&&!s.includes('H'))return false;
+    if(filter==='M'&&!s.includes('M'))return false;
+    if(filter==='O'&&!others(b).length)return false;
+    if(q&&!(b.name+' '+(b.notes||'')+' '+s.join(' ')).toLowerCase().includes(q))return false;
+    return true;
+  });
+  $('#list').innerHTML=shown.length?shown.map(b=>{
+    const img=images[b.id];
+    const sub=b.notes?b.notes.split('\n')[0]:(b.arrivals&&b.arrivals.length?'Arrived '+fmtD([...b.arrivals].sort().pop(),true):'');
+    return '<li data-id="'+esc(b.id)+'"><div class="th'+(img?'':' none')+'"'+(img?' style="background-image:url('+img+')"':'')+'>'+(img?'':esc(b.name[0]))+'</div>'+
+      '<div class="nm"><b>'+esc(b.name)+'</b>'+(sub?'<span>'+esc(sub)+'</span>':'')+'</div>'+
+      '<div class="chips">'+(b.seen||[]).map(chipHTML).join('')+'</div></li>';
+  }).join(''):'<div class="empty">No birds match.</div>';
+  // arrival banners (Swallow and any other bird with arrival records)
+  const arr=birds.filter(b=>b.arrivals);
+  const yr=new Date().getFullYear(),mo=new Date().getMonth();
+  $('#banners').innerHTML=(query||filter!=='all')?'':arr.map(b=>{
+    const list=[...b.arrivals].sort();
+    let line;
+    if(!list.length)line='No arrival dates yet';
+    else{
+      const last=list[list.length-1],st=arrStats(list);
+      const thisYear=parseD(last).y===yr;
+      line=thisYear?'Arrived <b>'+fmtD(last)+' '+yr+'</b> · average '+doyLabel(st.avg)
+        :(mo>=2&&mo<=5?'<b>Not yet recorded for '+yr+'</b> · usually around '+doyLabel(st.avg)
+        :'Last arrival '+fmtD(last,true)+' · average '+doyLabel(st.avg));
+    }
+    return '<div class="banner" data-id="'+esc(b.id)+'"><div><b>'+esc(b.name)+'s</b><br>'+line+'</div><span class="go">›</span></div>';
+  }).join('');
+}
+function showImgWarn(on){
+  $('#warn').innerHTML=on?'<div class="warn">Pictures not found. Upload <b>images.json</b> to the private <b>birds-data</b> repo on GitHub, then reopen the app.</div>':
+    (!token?'<div class="warn">Not connected yet. Tap ⚙︎ and paste your GitHub token to load the pictures and keep your records safe.</div>':'');
+}
+
+/* ---------- Pages ---------- */
+const pDetail=$('#pDetail'),pEdit=$('#pEdit'),pSet=$('#pSet');
+function open(p){p.classList.add('show');p.scrollTop=0}
+function close(p){p.classList.remove('show')}
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{
+  const p=b.closest('.page');
+  if(p===pDetail)saveNotes();
+  close(p);if(p===pEdit&&current&&byId(current))showDetail(current,true);render();
+});
+
+function showDetail(id,keepScroll){
+  const b=byId(id);if(!b){close(pDetail);return}
+  current=id;
+  $('#dTitle').textContent=b.name;
+  const img=images[b.id];
+  let h='<div class="hero">'+(img?'<img src="'+img+'" alt="">':'<div class="noimg">No picture yet – tap Edit to add one</div>')+'</div>';
+  h+='<div class="sec"><p class="big">'+esc(b.name)+'</p><div class="row">'+((b.seen||[]).length?(b.seen||[]).map(chipHTML).join(''):'<span class="small">Where seen not set</span>')+'</div>'+
+     (b.desc?'<p style="margin-top:10px">'+esc(b.desc)+'</p>':'')+
+     (b.link?'<p style="margin-top:10px"><a class="link" href="'+esc(b.link)+'" target="_blank" rel="noopener">RSPB guide ›</a></p>':'')+'</div>';
+  if(b.arrivals)h+=arrivalsHTML(b);
+  h+='<div class="sec"><h3>Notes</h3><textarea id="dNotes" placeholder="Add a note…">'+esc(b.notes||'')+'</textarea></div>';
+  const st=keepScroll?pDetail.scrollTop:0;
+  $('#dBody').innerHTML=h;
+  if(!pDetail.classList.contains('show'))open(pDetail);
+  pDetail.scrollTop=st;
+  const n=$('#dNotes');n.onblur=saveNotes;
+  const add=$('#aAdd');if(add)add.onclick=()=>addArrival(b);
+  document.querySelectorAll('[data-delarr]').forEach(x=>x.onclick=()=>{
+    const d=x.dataset.delarr;
+    if(confirm('Remove arrival date '+fmtD(d,true)+'?')){b.arrivals=b.arrivals.filter(a=>a!==d);touch(b,b.name+' arrival removed');showDetail(b.id,true)}
+  });
+}
+function saveNotes(){
+  const n=$('#dNotes');if(!n||!current)return;
+  const b=byId(current);if(!b)return;
+  if(n.value!==(b.notes||'')){b.notes=n.value;touch(b,b.name+' notes');toast('Note saved');render()}
+}
+function arrivalsHTML(b){
+  const list=[...b.arrivals].sort();
+  const today=new Date();const iso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  let h='<div class="sec"><h3>First arrival each year</h3>';
+  if(list.length){
+    const st=arrStats(list),span=Math.max(1,st.max-st.min);
+    h+='<div class="stats"><div><b>'+doyLabel(st.avg)+'</b>Average</div><div><b>'+fmtD(st.early,true)+'</b>Earliest</div><div><b>'+fmtD(st.late,true)+'</b>Latest</div></div>';
+    h+='<table class="arr">'+[...list].reverse().map((d,i)=>{
+      const v=doy(d),diff=Math.round(v-st.avg);
+      const pos=(v-st.min)/span*100,avgPos=(st.avg-st.min)/span*100;
+      return '<tr'+(i===0?' class="latest"':'')+'><td class="y">'+parseD(d).y+'</td><td class="d">'+fmtD(d)+'</td>'+
+        '<td><div class="barw"><s style="left:'+avgPos+'%"></s><i style="left:calc('+pos+'% - '+(pos/10)+'px)"></i></div></td>'+
+        '<td class="v">'+(diff===0?'on average':Math.abs(diff)+(Math.abs(diff)===1?' day ':' days ')+(diff<0?'early':'late'))+'</td>'+
+        '<td style="width:24px"><button class="x" data-delarr="'+d+'">✕</button></td></tr>';
+    }).join('')+'</table><p class="small" style="margin-top:6px">Red line = average date. '+list.length+' years recorded.</p>';
+  } else h+='<p class="small">No dates yet.</p>';
+  h+='<label class="f">Add a first-sighting date</label><div class="row"><input class="t" type="date" id="aDate" value="'+iso+'" style="flex:1;width:auto"><button class="btn" id="aAdd">Add</button></div>';
+  h+='<p class="small" style="margin-top:6px">One date per year – adding a date for a year that already has one replaces it.</p></div>';
+  return h;
+}
+function addArrival(b){
+  const v=$('#aDate').value;if(!v)return;
+  const y=v.slice(0,4);
+  const had=b.arrivals.find(a=>a.slice(0,4)===y);
+  if(had&&had!==v&&!confirm(y+' already has '+fmtD(had,true)+'. Replace it with '+fmtD(v,true)+'?'))return;
+  b.arrivals=b.arrivals.filter(a=>a.slice(0,4)!==y).concat(v).sort();
+  touch(b,b.name+' arrived '+v);toast('Added '+fmtD(v,true));showDetail(b.id,true);render();
+}
+
+/* ---------- Add / edit ---------- */
+function showEdit(id){
+  const b=id?byId(id):null;editing=id||null;editPic=undefined;
+  $('#eTitle').textContent=b?'Edit bird':'Add bird';
+  $('#eName').value=b?b.name:'';
+  const s=b?b.seen||[]:[];
+  $('#eH').checked=s.includes('H');$('#eM').checked=s.includes('M');
+  $('#eOther').value=s.filter(x=>x!=='H'&&x!=='M').join(', ');
+  $('#eDesc').value=b?b.desc||'':'';$('#eNotes').value=b?b.notes||'':'';
+  $('#eLink').value=b?b.link||'':'';
+  $('#eArr').checked=!!(b&&b.arrivals);
+  setEditPic(b?images[b.id]:null);
+  $('#eDelWrap').style.display=b?'':'none';
+  open(pEdit);
+  if(!b)setTimeout(()=>$('#eName').focus(),150);
+}
+function setEditPic(src){const p=$('#ePic');if(src){p.classList.remove('none');p.style.backgroundImage='url('+src+')';p.textContent=''}else{p.classList.add('none');p.style.backgroundImage='';p.textContent='–'}}
+$('#eFile').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{editPic=await shrink(f);setEditPic(editPic)}catch(err){alert('Couldn’t read that picture.')}
+  e.target.value='';
+};
+$('#eNoPic').onclick=()=>{editPic=null;setEditPic(null)};
+function shrink(file){return new Promise((res,rej)=>{
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{const max=400,k=Math.min(1,max/Math.max(img.width,img.height));
+    const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.8))};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej()};img.src=url;})}
+$('#eSave').onclick=async()=>{
+  const name=$('#eName').value.trim();
+  if(!name){alert('Please give the bird a name.');return}
+  const dup=live().find(b=>b.name.toLowerCase()===name.toLowerCase()&&b.id!==editing);
+  if(dup){alert(name+' is already in your list.');return}
+  const seen=[];if($('#eH').checked)seen.push('H');if($('#eM').checked)seen.push('M');
+  $('#eOther').value.split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{if(!seen.includes(s))seen.push(s)});
+  let b=editing?byId(editing):null;
+  const isNew=!b;
+  if(isNew){
+    let id=slugify(name)||'bird',n=2;while(state.birds.some(x=>x.id===id))id=slugify(name)+'-'+(n++);
+    b={id,arrivals:null};state.birds.push(b);
+  }
+  b.name=name;b.seen=seen;b.desc=$('#eDesc').value.trim();b.notes=$('#eNotes').value;
+  b.link=$('#eLink').value.trim()||(isNew?RSPB+slugify(name)+'/':'');
+  const wantArr=$('#eArr').checked;
+  if(wantArr&&!b.arrivals)b.arrivals=[];
+  if(!wantArr&&b.arrivals){if(!b.arrivals.length||confirm('Stop recording arrival dates for '+name+'? The '+b.arrivals.length+' saved dates will be removed.'))b.arrivals=null}
+  if(editPic!==undefined){
+    if(editPic)images[b.id]=editPic;else images[b.id]=null;
+    imgDirty=true;await IDB.set('images',images);
+  }
+  touch(b,(isNew?'added ':'')+name);
+  close(pEdit);current=b.id;render();showDetail(b.id);
+  toast(isNew?name+' added':'Saved');
+};
+$('#eDel').onclick=()=>{
+  const b=byId(editing);if(!b)return;
+  if(!confirm('Delete '+b.name+' and its notes'+(b.arrivals&&b.arrivals.length?' and arrival dates':'')+'?'))return;
+  state.birds=state.birds.map(x=>x.id===b.id?{id:b.id,deleted:true,t:now()}:x);
+  if(images[b.id]){images[b.id]=null;imgDirty=true;IDB.set('images',images)}
+  dirty=true;saveLocal();queuePush('deleted '+b.name);
+  close(pEdit);close(pDetail);current=null;render();toast(b.name+' deleted');
+};
+
+/* ---------- Settings ---------- */
+function showSettings(){
+  $('#sState').textContent=token?'This phone is connected to '+OWNER+'/'+REPO+'.':'Not connected. Paste the token you made for the birds-data repo.';
+  $('#sConnect').style.display=token?'none':'';$('#sConnected').style.display=token?'':'none';
+  $('#sToken').value='';open(pSet);
+}
+$('#sGo').onclick=async()=>{
+  const t=$('#sToken').value.trim();if(!t){alert('Paste the token first.');return}
+  token=t;
+  try{
+    const r=await gh(DATA);
+    if(r.status===401||r.status===403){token='';alert('GitHub did not accept that token. Check it has Contents: Read and write on birds-data.');return}
+    if(r.status!==200&&r.status!==404){token='';alert('Could not reach GitHub ('+r.status+'). Try again in a moment.');return}
+    if(r.status===404){const repo=await fetch('https://api.github.com/repos/'+OWNER+'/'+REPO,{headers:{'Authorization':'Bearer '+t}});
+      if(!repo.ok){token='';alert('The token works, but it can’t see the '+REPO+' repo. Check the repo name and the token’s repository access.');return}}
+  }catch(e){token='';alert('Could not reach GitHub. Check you are online.');return}
+  LS.set('token',token);LS.set('imgSha','');close(pSet);showImgWarn(false);toast('Connected');sync();
+};
+$('#sOff').onclick=()=>{if(!confirm('Disconnect this phone? Your records stay safe on GitHub.'))return;token='';LS.del('token');setStatus('');showImgWarn(false);showSettings()};
+$('#sSync').onclick=()=>{close(pSet);sync()};
+$('#sExport').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='birds-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+};
+
+/* ---------- Wiring ---------- */
+$('#list').onclick=e=>{const li=e.target.closest('li[data-id]');if(li)showDetail(li.dataset.id)};
+$('#banners').onclick=e=>{const b=e.target.closest('[data-id]');if(b)showDetail(b.dataset.id)};
+$('#addBtn').onclick=()=>showEdit(null);
+$('#setBtn').onclick=showSettings;
+$('#dEdit').onclick=()=>{saveNotes();showEdit(current)};
+$('#q').oninput=e=>{query=e.target.value;render()};
+$('#seg').onclick=e=>{const b=e.target.closest('button');if(!b)return;filter=b.dataset.f;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));render()};
+window.addEventListener('online',()=>sync());
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync()});
+setInterval(()=>{if(document.visibilityState==='visible'&&token)sync()},60000);
+
+(async()=>{
+  await IDB.open();
+  images=(await IDB.get('images'))||{};
+  render();showImgWarn(false);
+  sync();
+})();
+</script>
+</body>
+</html>
