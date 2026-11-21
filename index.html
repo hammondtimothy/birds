@@ -120,12 +120,18 @@ table.arr{width:100%;border-collapse:collapse;font-size:14px}
     <label class="f">Other places (separate with commas)</label>
     <input class="t" id="eOther" placeholder="e.g. Langdon Beck, Kielder">
     <label class="f">Picture</label>
-    <div class="row">
-      <div class="th none" id="ePic" style="width:90px;height:68px"></div>
-      <label class="btn grey" for="eFile">Choose photo</label>
-      <button class="btn grey" id="eNoPic" type="button">Remove</button>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="th none" id="ePic" style="width:96px;height:96px"></div>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <button class="btn grey" id="eRspb" type="button" style="padding:9px 6px">RSPB page ↗</button>
+        <button class="btn" id="ePaste" type="button" style="padding:9px 6px">Paste picture</button>
+        <label class="btn grey" for="eFile" style="padding:9px 6px;text-align:center">From Photos</label>
+        <button class="btn grey" id="eNoPic" type="button" style="padding:9px 6px">Remove</button>
+      </div>
       <input type="file" id="eFile" accept="image/*" style="display:none">
     </div>
+    <div id="ePasteBox" contenteditable="true" style="display:none;margin-top:8px;border:2px dashed #b9c6d3;border-radius:10px;padding:14px;text-align:center;color:#6b7683;font-size:14px;-webkit-user-select:text;user-select:text">Tap and hold here, then tap <b>Paste</b></div>
+    <p class="small" style="margin-top:6px">1. Tap <b>RSPB page</b>, press and hold the bird picture → <b>Copy</b>, then tap <b>Done</b>.<br>2. Tap <b>Paste picture</b>.</p>
     <label class="f">Short description</label>
     <textarea id="eDesc" style="min-height:70px"></textarea>
     <label class="f">Notes</label>
@@ -158,7 +164,7 @@ table.arr{width:100%;border-collapse:collapse;font-size:14px}
     <p class="small">Your records live in the private birds-data repo. You can also save a copy to Files.</p>
     <p style="margin-top:10px"><button class="btn grey" id="sExport">Save a backup copy</button></p>
   </div>
-  <div class="sec small">Birds of Mordon · version 1.0</div>
+  <div class="sec small">Birds of Mordon · version 1.2</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -502,6 +508,7 @@ function showEdit(id){
   $('#eArr').checked=!!(b&&b.arrivals);
   setEditPic(b?images[b.id]:null);
   $('#eDelWrap').style.display=b?'':'none';
+  $('#ePasteBox').style.display='none';
   open(pEdit);
   if(!b)setTimeout(()=>$('#eName').focus(),150);
 }
@@ -512,6 +519,33 @@ $('#eFile').onchange=async e=>{
   e.target.value='';
 };
 $('#eNoPic').onclick=()=>{editPic=null;setEditPic(null)};
+$('#eRspb').onclick=()=>{
+  const name=$('#eName').value.trim();
+  let url=$('#eLink').value.trim();
+  if(!url&&name){url=RSPB+(SLUG_FIX[slugify(name)]||slugify(name))+'/';$('#eLink').value=url}
+  window.open(url||RSPB,'_blank');
+};
+async function usePasted(blob){
+  try{editPic=await shrink(blob);setEditPic(editPic);$('#ePasteBox').style.display='none';toast('Picture added')}
+  catch(e){alert('That didn’t paste as a picture. On the RSPB page, press and hold the picture itself and choose Copy.')}
+}
+$('#ePaste').onclick=async()=>{
+  if(navigator.clipboard&&navigator.clipboard.read){
+    try{
+      const items=await navigator.clipboard.read();
+      for(const it of items){const t=it.types.find(x=>x.startsWith('image/'));if(t){await usePasted(await it.getType(t));return}}
+      alert('There’s no picture on the clipboard yet. On the RSPB page, press and hold the bird picture and choose Copy, then try again.');return;
+    }catch(e){/* not allowed – fall back to the paste box */}
+  }
+  const box=$('#ePasteBox');box.style.display='block';box.focus();
+};
+$('#ePasteBox').addEventListener('paste',e=>{
+  e.preventDefault();
+  const items=[...(e.clipboardData&&e.clipboardData.items||[])];
+  const it=items.find(i=>i.type.startsWith('image/'));
+  if(it)usePasted(it.getAsFile());
+  else alert('There’s no picture on the clipboard. On the RSPB page, press and hold the bird picture and choose Copy.');
+});
 function shrink(file){return new Promise((res,rej)=>{
   const url=URL.createObjectURL(file),img=new Image();
   img.onload=()=>{const max=400,k=Math.min(1,max/Math.max(img.width,img.height));
