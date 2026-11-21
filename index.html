@@ -123,7 +123,7 @@ table.arr{width:100%;border-collapse:collapse;font-size:14px}
     <div style="display:flex;gap:10px;align-items:center">
       <div class="th none" id="ePic" style="width:96px;height:96px"></div>
       <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <button class="btn grey" id="eRspb" type="button" style="padding:9px 6px">RSPB page ↗</button>
+        <a class="btn grey" id="eRspb" href="https://www.rspb.org.uk/birds-and-wildlife/wildlife-guides/bird-a-z/" target="_blank" rel="noopener" style="padding:9px 6px;text-align:center;text-decoration:none">RSPB page ↗</a>
         <button class="btn" id="ePaste" type="button" style="padding:9px 6px">Paste picture</button>
         <label class="btn grey" for="eFile" style="padding:9px 6px;text-align:center">From Photos</label>
         <button class="btn grey" id="eNoPic" type="button" style="padding:9px 6px">Remove</button>
@@ -164,7 +164,7 @@ table.arr{width:100%;border-collapse:collapse;font-size:14px}
     <p class="small">Your records live in the private birds-data repo. You can also save a copy to Files.</p>
     <p style="margin-top:10px"><button class="btn grey" id="sExport">Save a backup copy</button></p>
   </div>
-  <div class="sec small">Birds of Mordon · version 1.2</div>
+  <div class="sec small">Birds of Mordon · version 1.3</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -509,6 +509,7 @@ function showEdit(id){
   setEditPic(b?images[b.id]:null);
   $('#eDelWrap').style.display=b?'':'none';
   $('#ePasteBox').style.display='none';
+  updRspb();
   open(pEdit);
   if(!b)setTimeout(()=>$('#eName').focus(),150);
 }
@@ -519,12 +520,18 @@ $('#eFile').onchange=async e=>{
   e.target.value='';
 };
 $('#eNoPic').onclick=()=>{editPic=null;setEditPic(null)};
-$('#eRspb').onclick=()=>{
-  const name=$('#eName').value.trim();
-  let url=$('#eLink').value.trim();
-  if(!url&&name){url=RSPB+(SLUG_FIX[slugify(name)]||slugify(name))+'/';$('#eLink').value=url}
-  window.open(url||RSPB,'_blank');
-};
+function rspbUrl(){
+  const name=$('#eName').value.trim(),link=$('#eLink').value.trim();
+  return link||(name?RSPB+(SLUG_FIX[slugify(name)]||slugify(name))+'/':RSPB);
+}
+function updRspb(){$('#eRspb').href=rspbUrl()}
+$('#eName').addEventListener('input',updRspb);
+$('#eLink').addEventListener('input',updRspb);
+$('#eRspb').addEventListener('click',()=>{
+  // plain link – iOS home-screen apps open it in a Safari sheet with a Done button
+  updRspb();
+  if(!$('#eLink').value.trim()&&$('#eName').value.trim())$('#eLink').value=rspbUrl();
+});
 async function usePasted(blob){
   try{editPic=await shrink(blob);setEditPic(editPic);$('#ePasteBox').style.display='none';toast('Picture added')}
   catch(e){alert('That didn’t paste as a picture. On the RSPB page, press and hold the picture itself and choose Copy.')}
